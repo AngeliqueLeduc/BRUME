@@ -353,8 +353,10 @@
       font-size: 15px;
     }
 
-    .app.artisan-mode .boutique-only { display: none !important; }
+    .app:not(.admin-mode) .boutique-only { display: none !important; }
     .app:not(.artisan-mode) .artisan-only { display: none !important; }
+    .app:not(.admin-mode) .admin-only { display: none !important; }
+    .app.artisan-mode .office-tabs { display: none !important; }
 
     @media (max-width: 1040px) {
       .app { grid-template-columns: 1fr; }
@@ -391,19 +393,15 @@
         <h1>BRUME</h1>
         <p>Suivi des ventes artisans, trigrammes et virements mensuels.</p>
       </div>
-      <div class="side-kpis">
-        <div class="side-kpi"><span>Artisans</span><strong id="sideArtisans">0</strong></div>
-        <div class="side-kpi"><span>Ventes</span><strong id="sideSales">0</strong></div>
-        <div class="side-kpi"><span>Commission</span><strong>25 %</strong></div>
-      </div>
       <p class="side-note">Les donnees restent dans ce navigateur. L'export Excel cree un onglet global et un onglet separe pour chaque trigramme.</p>
     </aside>
 
     <main>
-      <div class="office-tabs boutique-only" id="officeTabs">
-        <button class="office-tab active" type="button" data-office-tab="sales">Enregistrement des ventes</button>
-        <button class="office-tab" type="button" data-office-tab="settings">Parametrage artisans</button>
-        <button class="office-tab" type="button" data-office-tab="artisanAccess">Acces artisan</button>
+      <div class="office-tabs" id="officeTabs">
+        <button class="office-tab admin-only" type="button" data-office-tab="sales">Enregistrement des ventes</button>
+        <button class="office-tab admin-only" type="button" data-office-tab="settings">Parametrage artisans</button>
+        <button class="office-tab admin-only" type="button" data-office-tab="recap">Recap</button>
+        <button class="office-tab active" type="button" data-office-tab="access">Acces artisan / admin</button>
       </div>
 
       <div class="topbar">
@@ -471,12 +469,22 @@
         </div>
       </section>
 
-      <section class="boutique-only office-panel" id="artisanAccessPanel" data-office-panel="artisanAccess" hidden>
+      <section class="office-panel" id="accessPanel" data-office-panel="access">
         <div class="section-head">
-          <h3>Acces artisan</h3>
+          <h3>Acces artisan / administrateur</h3>
         </div>
         <div class="section-body">
           <div class="login-box">
+            <h2>Administrateur BRUME</h2>
+            <label>Code administrateur
+              <input id="adminCode" type="password" placeholder="Code administrateur">
+            </label>
+            <div class="inline-actions">
+              <button id="adminLogin" type="button">Ouvrir l'administration</button>
+            </div>
+          </div>
+          <div class="login-box" style="margin-top: 14px;">
+            <h2>Artisan</h2>
             <label>Trigramme
               <input id="loginTrigram" type="text" maxlength="3" placeholder="BGP">
             </label>
@@ -491,48 +499,61 @@
       </section>
 
       <div class="actions artisan-only">
-        <button class="secondary" id="backOffice" type="button">Retour boutique</button>
+        <button class="secondary" id="backOffice" type="button">Quitter l'espace artisan</button>
       </div>
 
-      <div class="cards">
-        <div class="card"><span>Total ventes</span><strong id="kpiGross">0 EUR</strong></div>
-        <div class="card"><span>Commission BRUME</span><strong id="kpiCommission">0 EUR</strong></div>
-        <div class="card"><span>Virements artisans</span><strong id="kpiPayout">0 EUR</strong></div>
-        <div class="card"><span>Mois affiche</span><strong id="kpiMonth">Tous</strong></div>
-      </div>
-
-      <div class="grid">
-        <section class="boutique-only">
-          <div class="section-head">
-            <h3>Filtres</h3>
-          </div>
-          <div class="section-body">
-            <label>Mois
-              <select id="monthFilter"></select>
-            </label>
-            <label>Vue artisan
-              <select id="artisanFilter"></select>
-            </label>
-          </div>
-        </section>
-
-        <section>
-          <div class="section-head">
-            <h3>Totaux mensuels</h3>
-          </div>
-          <div class="section-body">
-            <div class="table-wrap" id="monthlyTable"></div>
-          </div>
-        </section>
-      </div>
-
-      <section>
+      <section class="office-panel" id="recapPanel" data-office-panel="recap" hidden>
         <div class="section-head">
-          <h3 id="detailTitle">Toutes les ventes</h3>
+          <h3>Recapitulatif</h3>
         </div>
-        <div class="tabs" id="tabs"></div>
         <div class="section-body">
-          <div class="table-wrap" id="salesTable"></div>
+          <div class="side-kpis">
+            <div class="side-kpi"><span>Artisans</span><strong id="sideArtisans">0</strong></div>
+            <div class="side-kpi"><span>Ventes</span><strong id="sideSales">0</strong></div>
+            <div class="side-kpi"><span>Commission</span><strong>25 %</strong></div>
+          </div>
+
+          <div class="cards" style="margin-top: 14px;">
+            <div class="card"><span>Total ventes</span><strong id="kpiGross">0 EUR</strong></div>
+            <div class="card"><span>Commission BRUME</span><strong id="kpiCommission">0 EUR</strong></div>
+            <div class="card"><span>Virements artisans</span><strong id="kpiPayout">0 EUR</strong></div>
+            <div class="card"><span>Mois affiche</span><strong id="kpiMonth">Tous</strong></div>
+          </div>
+
+          <div class="grid" style="margin-top: 18px;">
+            <section class="boutique-only">
+              <div class="section-head">
+                <h3>Filtres</h3>
+              </div>
+              <div class="section-body">
+                <label>Mois
+                  <select id="monthFilter"></select>
+                </label>
+                <label>Vue artisan
+                  <select id="artisanFilter"></select>
+                </label>
+              </div>
+            </section>
+
+            <section>
+              <div class="section-head">
+                <h3>Totaux mensuels</h3>
+              </div>
+              <div class="section-body">
+                <div class="table-wrap" id="monthlyTable"></div>
+              </div>
+            </section>
+          </div>
+
+          <section style="margin-top: 18px;">
+            <div class="section-head">
+              <h3 id="detailTitle">Toutes les ventes</h3>
+            </div>
+            <div class="tabs" id="tabs"></div>
+            <div class="section-body">
+              <div class="table-wrap" id="salesTable"></div>
+            </div>
+          </section>
         </div>
       </section>
     </main>
@@ -542,13 +563,14 @@
     const STORAGE_KEY = "brume_ventes_artisans_v1";
     const ARTISAN_KEY = "brume_parametrage_artisans_v1";
     const COMMISSION_RATE = 0.25;
+    const ADMIN_CODE = "BRUME2026";
 
     const state = {
       sales: [],
       artisans: [],
       activeTrigram: "ALL",
-      officeTab: "sales",
-      mode: "boutique",
+      officeTab: "access",
+      mode: "locked",
       loggedTrigram: ""
     };
 
@@ -556,6 +578,8 @@
       app: document.getElementById("app"),
       sideArtisans: document.getElementById("sideArtisans"),
       sideSales: document.getElementById("sideSales"),
+      adminCode: document.getElementById("adminCode"),
+      adminLogin: document.getElementById("adminLogin"),
       loginTrigram: document.getElementById("loginTrigram"),
       loginCode: document.getElementById("loginCode"),
       artisanLogin: document.getElementById("artisanLogin"),
@@ -839,7 +863,7 @@
               <th>Montant TTC</th>
               <th>Commission</th>
               <th>Virement</th>
-              ${state.mode === "boutique" ? "<th></th>" : ""}
+              ${state.mode === "admin" ? "<th></th>" : ""}
             </tr>
           </thead>
           <tbody>
@@ -854,7 +878,7 @@
                   <td>${escapeHtml(formatMoney(amounts.gross))}</td>
                   <td>${escapeHtml(formatMoney(amounts.commission))}</td>
                   <td>${escapeHtml(formatMoney(amounts.payout))}</td>
-                  ${state.mode === "boutique" ? `<td><button class="secondary" data-delete="${escapeHtml(sale.id)}">Supprimer</button></td>` : ""}
+                  ${state.mode === "admin" ? `<td><button class="secondary" data-delete="${escapeHtml(sale.id)}">Supprimer</button></td>` : ""}
                 </tr>
               `;
             }).join("")}
@@ -865,7 +889,7 @@
               <td>${escapeHtml(formatMoney(totals.gross))}</td>
               <td>${escapeHtml(formatMoney(totals.commission))}</td>
               <td>${escapeHtml(formatMoney(totals.payout))}</td>
-              ${state.mode === "boutique" ? "<td></td>" : ""}
+              ${state.mode === "admin" ? "<td></td>" : ""}
             </tr>
           </tfoot>
         </table>
@@ -905,6 +929,9 @@
     }
 
     function renderOfficeTabs() {
+      if (state.mode === "locked") state.officeTab = "access";
+      if (state.mode === "artisan") state.officeTab = "recap";
+      if (state.mode !== "admin" && !["access", "recap"].includes(state.officeTab)) state.officeTab = "access";
       document.querySelectorAll("[data-office-tab]").forEach(button => {
         button.classList.toggle("active", button.dataset.officeTab === state.officeTab);
       });
@@ -915,6 +942,8 @@
 
     function render() {
       els.app.classList.toggle("artisan-mode", state.mode === "artisan");
+      els.app.classList.toggle("admin-mode", state.mode === "admin");
+      els.app.classList.toggle("locked-mode", state.mode === "locked");
       renderOfficeTabs();
       updateLists();
       renderTabs();
@@ -1155,8 +1184,9 @@
     els.officeTabs.addEventListener("click", event => {
       const button = event.target.closest("[data-office-tab]");
       if (!button) return;
+      if (state.mode !== "admin" && button.dataset.officeTab !== "access") return;
       state.officeTab = button.dataset.officeTab;
-      renderOfficeTabs();
+      render();
     });
 
     els.tabs.addEventListener("click", event => {
@@ -1199,6 +1229,21 @@
       }
     });
 
+    els.adminLogin.addEventListener("click", () => {
+      const code = sanitizeText(els.adminCode.value);
+      if (code !== ADMIN_CODE) {
+        showNotice("Code administrateur incorrect.");
+        return;
+      }
+      state.mode = "admin";
+      state.loggedTrigram = "";
+      state.activeTrigram = "ALL";
+      state.officeTab = "sales";
+      els.adminCode.value = "";
+      render();
+      showNotice("Administration ouverte.");
+    });
+
     els.artisanLogin.addEventListener("click", () => {
       const trigram = normalize(els.loginTrigram.value).replace(/[^A-Z0-9]/g, "").slice(0, 3);
       const code = sanitizeText(els.loginCode.value);
@@ -1210,15 +1255,16 @@
       state.mode = "artisan";
       state.loggedTrigram = trigram;
       state.activeTrigram = trigram;
+      state.officeTab = "recap";
       render();
       showNotice(`Espace ${trigram} ouvert.`);
     });
 
     els.backOffice.addEventListener("click", () => {
-      state.mode = "boutique";
+      state.mode = "locked";
       state.loggedTrigram = "";
       state.activeTrigram = "ALL";
-      state.officeTab = "sales";
+      state.officeTab = "access";
       els.loginCode.value = "";
       render();
     });
@@ -1230,8 +1276,9 @@
       state.artisans = [];
       saveLocal();
       state.activeTrigram = "ALL";
-      state.mode = "boutique";
+      state.mode = "locked";
       state.loggedTrigram = "";
+      state.officeTab = "access";
       render();
       showNotice("Donnees effacees.");
     });
