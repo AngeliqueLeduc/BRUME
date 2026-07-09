@@ -251,7 +251,14 @@
       padding: 14px 16px 0;
     }
 
-    .tab {
+    .office-tabs {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .tab, .office-tab {
       background: #edf1ed;
       color: #2d3b33;
       border: 1px solid #d8e0d8;
@@ -259,11 +266,13 @@
       min-width: 54px;
     }
 
-    .tab.active {
+    .tab.active, .office-tab.active {
       background: var(--brand);
       color: #fff;
       border-color: var(--brand);
     }
+
+    .office-panel[hidden] { display: none !important; }
 
     .table-wrap {
       overflow: auto;
@@ -392,30 +401,12 @@
 
       <div class="notice" id="notice"></div>
 
-      <section class="boutique-only">
-        <div class="section-head">
-          <h3>Parametrage artisans</h3>
-        </div>
-        <div class="section-body">
-          <form id="artisanForm" class="form-grid">
-            <label>Nom de l'artisan
-              <input id="settingsArtisanName" type="text" placeholder="Ex. Bougies Paula" required>
-            </label>
-            <label>Trigramme calcule
-              <input id="settingsTrigram" type="text" maxlength="3" placeholder="BGP" required>
-            </label>
-            <label class="span-2">Code d'acces artisan
-              <input id="settingsCode" type="text" placeholder="Ex. BGP-2026" required>
-            </label>
-            <div class="span-2 inline-actions">
-              <button type="submit">Ajouter / mettre a jour</button>
-            </div>
-          </form>
-          <div class="table-wrap" id="artisanSettingsTable" style="margin-top: 14px;"></div>
-        </div>
-      </section>
+      <div class="office-tabs boutique-only" id="officeTabs">
+        <button class="office-tab active" type="button" data-office-tab="sales">Enregistrement des ventes</button>
+        <button class="office-tab" type="button" data-office-tab="settings">Parametrage artisans</button>
+      </div>
 
-      <section class="boutique-only">
+      <section class="boutique-only office-panel" id="salesPanel" data-office-panel="sales">
         <div class="section-head">
           <h3>Nouvelle vente</h3>
         </div>
@@ -441,6 +432,29 @@
               <button class="secondary" type="button" id="clearForm">Vider</button>
             </div>
           </form>
+        </div>
+      </section>
+
+      <section class="boutique-only office-panel" id="settingsPanel" data-office-panel="settings" hidden>
+        <div class="section-head">
+          <h3>Parametrage artisans</h3>
+        </div>
+        <div class="section-body">
+          <form id="artisanForm" class="form-grid">
+            <label>Nom de l'artisan
+              <input id="settingsArtisanName" type="text" placeholder="Ex. Bougies Paula" required>
+            </label>
+            <label>Trigramme calcule
+              <input id="settingsTrigram" type="text" maxlength="3" placeholder="BGP" required>
+            </label>
+            <label class="span-2">Code d'acces artisan
+              <input id="settingsCode" type="text" placeholder="Ex. BGP-2026" required>
+            </label>
+            <div class="span-2 inline-actions">
+              <button type="submit">Ajouter / mettre a jour</button>
+            </div>
+          </form>
+          <div class="table-wrap" id="artisanSettingsTable" style="margin-top: 14px;"></div>
         </div>
       </section>
 
@@ -497,6 +511,7 @@
       sales: [],
       artisans: [],
       activeTrigram: "ALL",
+      officeTab: "sales",
       mode: "boutique",
       loggedTrigram: ""
     };
@@ -515,6 +530,7 @@
       exportExcel: document.getElementById("exportExcel"),
       resetData: document.getElementById("resetData"),
       notice: document.getElementById("notice"),
+      officeTabs: document.getElementById("officeTabs"),
       artisanForm: document.getElementById("artisanForm"),
       settingsArtisanName: document.getElementById("settingsArtisanName"),
       settingsTrigram: document.getElementById("settingsTrigram"),
@@ -852,8 +868,18 @@
       `;
     }
 
+    function renderOfficeTabs() {
+      document.querySelectorAll("[data-office-tab]").forEach(button => {
+        button.classList.toggle("active", button.dataset.officeTab === state.officeTab);
+      });
+      document.querySelectorAll("[data-office-panel]").forEach(panel => {
+        panel.hidden = panel.dataset.officePanel !== state.officeTab;
+      });
+    }
+
     function render() {
       els.app.classList.toggle("artisan-mode", state.mode === "artisan");
+      renderOfficeTabs();
       updateLists();
       renderTabs();
       renderArtisanSettings();
@@ -1089,6 +1115,13 @@
     els.clearForm.addEventListener("click", clearForm);
     els.monthFilter.addEventListener("change", render);
     els.artisanFilter.addEventListener("change", render);
+
+    els.officeTabs.addEventListener("click", event => {
+      const button = event.target.closest("[data-office-tab]");
+      if (!button) return;
+      state.officeTab = button.dataset.officeTab;
+      renderOfficeTabs();
+    });
 
     els.tabs.addEventListener("click", event => {
       const button = event.target.closest("[data-tab]");
