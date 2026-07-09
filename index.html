@@ -256,6 +256,12 @@
       gap: 8px;
       flex-wrap: wrap;
       align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 5;
+      background: rgba(247, 248, 251, 0.96);
+      border-bottom: 1px solid var(--line);
+      padding: 8px 0;
     }
 
     .tab, .office-tab {
@@ -264,6 +270,11 @@
       border: 1px solid #d8e0d8;
       padding: 8px 11px;
       min-width: 54px;
+    }
+
+    .office-tab {
+      min-height: 44px;
+      flex: 0 1 auto;
     }
 
     .tab.active, .office-tab.active {
@@ -357,6 +368,18 @@
       .topbar { align-items: stretch; }
       .actions, .inline-actions { width: 100%; }
       button { flex: 1 1 auto; }
+      .office-tabs {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 7px;
+        margin: -14px -14px 4px;
+        padding: 10px 14px;
+      }
+      .office-tab {
+        width: 100%;
+        min-height: 48px;
+        font-size: 15px;
+      }
     }
   </style>
 </head>
@@ -368,17 +391,6 @@
         <h1>BRUME</h1>
         <p>Suivi des ventes artisans, trigrammes et virements mensuels.</p>
       </div>
-      <div class="login-box">
-        <h2>Acces artisan</h2>
-        <label>Trigramme
-          <input id="loginTrigram" type="text" maxlength="3" placeholder="BGP">
-        </label>
-        <label>Code artisan
-          <input id="loginCode" type="password" placeholder="Code remis a l'artisan">
-        </label>
-        <button id="artisanLogin" type="button">Voir mon recapitulatif</button>
-        <button class="secondary artisan-only" id="backOffice" type="button">Retour boutique</button>
-      </div>
       <div class="side-kpis">
         <div class="side-kpi"><span>Artisans</span><strong id="sideArtisans">0</strong></div>
         <div class="side-kpi"><span>Ventes</span><strong id="sideSales">0</strong></div>
@@ -388,6 +400,12 @@
     </aside>
 
     <main>
+      <div class="office-tabs boutique-only" id="officeTabs">
+        <button class="office-tab active" type="button" data-office-tab="sales">Enregistrement des ventes</button>
+        <button class="office-tab" type="button" data-office-tab="settings">Parametrage artisans</button>
+        <button class="office-tab" type="button" data-office-tab="artisanAccess">Acces artisan</button>
+      </div>
+
       <div class="topbar">
         <h2>Tableau de suivi</h2>
         <div class="actions boutique-only">
@@ -400,11 +418,6 @@
       </div>
 
       <div class="notice" id="notice"></div>
-
-      <div class="office-tabs boutique-only" id="officeTabs">
-        <button class="office-tab active" type="button" data-office-tab="sales">Enregistrement des ventes</button>
-        <button class="office-tab" type="button" data-office-tab="settings">Parametrage artisans</button>
-      </div>
 
       <section class="boutique-only office-panel" id="salesPanel" data-office-panel="sales">
         <div class="section-head">
@@ -457,6 +470,29 @@
           <div class="table-wrap" id="artisanSettingsTable" style="margin-top: 14px;"></div>
         </div>
       </section>
+
+      <section class="boutique-only office-panel" id="artisanAccessPanel" data-office-panel="artisanAccess" hidden>
+        <div class="section-head">
+          <h3>Acces artisan</h3>
+        </div>
+        <div class="section-body">
+          <div class="login-box">
+            <label>Trigramme
+              <input id="loginTrigram" type="text" maxlength="3" placeholder="BGP">
+            </label>
+            <label>Code artisan
+              <input id="loginCode" type="password" placeholder="Code remis a l'artisan">
+            </label>
+            <div class="inline-actions">
+              <button id="artisanLogin" type="button">Voir mon recapitulatif</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div class="actions artisan-only">
+        <button class="secondary" id="backOffice" type="button">Retour boutique</button>
+      </div>
 
       <div class="cards">
         <div class="card"><span>Total ventes</span><strong id="kpiGross">0 EUR</strong></div>
@@ -1182,6 +1218,7 @@
       state.mode = "boutique";
       state.loggedTrigram = "";
       state.activeTrigram = "ALL";
+      state.officeTab = "sales";
       els.loginCode.value = "";
       render();
     });
